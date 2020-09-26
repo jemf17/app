@@ -149,43 +149,74 @@ class WidgetAgregar extends StatelessWidget {
 }
 
 // ignore: must_be_immutable
-class WidgetVer extends StatelessWidget {
+class VerWidget extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _WidgetVer();
+}
+
+class _WidgetVer extends State<VerWidget> {
   TaskDatabase db = TaskDatabase();
-  //@override
-  //WidgetVerState createState() => WidgetVer();
-  showList() {
+
+  update() {
+    setState(() {
+      //Future<List<Task>> up = db.obtener();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder(
-      future: db.obtener(),
+      future: db.initDB(),
+      // ignore: missing_return
       builder: (BuildContext context, AsyncSnapshot<List<Task>> snapshot) {
-        return ListView(
-          children: <Widget>[
-            for (Task task in snapshot.data)
-              ListTile(
-                  leading: GestureDetector(
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      padding: EdgeInsets.symmetric(vertical: 4.0),
-                      alignment: Alignment.center,
-                      child: IconButton(
-                          icon: Icon(Icons.delete_outline),
-                          onPressed: () {
-                            db.delete(task.palabra);
-                          }),
-                    ),
-                  ),
-                  //Icon(Icons.delete),
-                  title: Text("palabra: " +
-                      task.palabra +
-                      " \nsignifica: " +
-                      task.significado +
-                      "\nDescriocion: " +
-                      task.desc)),
-          ],
-        );
+        if (snapshot.connectionState == ConnectionState.done) {
+          return FutureBuilder(
+            future: db.obtener(),
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Task>> snapshot) {
+              return ListView(
+                children: <Widget>[
+                  for (Task task in snapshot.data)
+                    ListTile(
+                        leading: GestureDetector(
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            padding: EdgeInsets.symmetric(vertical: 4.0),
+                            alignment: Alignment.center,
+                            child: IconButton(
+                                icon: Icon(Icons.delete_outline),
+                                onPressed: () {
+                                  db.delete(task.palabra);
+                                  update();
+                                  print(snapshot.data);
+                                }),
+                          ),
+                        ),
+                        //Icon(Icons.delete),
+                        title: Text("palabra: " +
+                            task.palabra +
+                            " \nsignifica: " +
+                            task.significado +
+                            "\nDescripcion: " +
+                            task.desc)),
+                ],
+              );
+            },
+          );
+        } else {
+          return CircularProgressIndicator();
+          //}
+        }
       },
     );
   }
+}
+
+// ignore: must_be_immutable
+class WidgetVer extends StatelessWidget {
+  //@override
+  //WidgetVerState createState() => WidgetVer();
 
   @override
   Widget build(BuildContext context) {
@@ -193,18 +224,7 @@ class WidgetVer extends StatelessWidget {
       appBar: AppBar(
         title: Text("Palabras"),
       ),
-      body: FutureBuilder(
-        future: db.initDB(),
-        // ignore: missing_return
-        builder: (BuildContext context, AsyncSnapshot<List<Task>> snapshot) {
-          //if (snapshot.connectionState == ConnectionState.done) {
-          return showList();
-          //} else {
-          // ignore: unused_label
-          //return Center(child: Text("agregar palabras"));
-          //}
-        },
-      ),
+      body: VerWidget(),
     );
   }
 }
